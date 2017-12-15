@@ -1,0 +1,6 @@
+[package]
+name = "cero"
+version = "0.1.0"
+authors = ["Hugh McElderry <Hugh@hugh.moe>"]
+
+[dependencies]
