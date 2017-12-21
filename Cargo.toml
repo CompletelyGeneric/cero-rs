@@ -1,6 +1,25 @@
 [package]
 name = "cero"
 version = "0.1.0"
-authors = ["Hugh McElderry <Hugh@hugh.moe>"]
+authors = ["Hugh McElderry <hugh@hugh.moe>"]
+description = "A (de)serialization library for gnuradio's ZeroMQ blocks"
+documentation = "TODO:"
+homepage = ""
+repository = ""
+
+readme = "README.md"
+keywords = ["gnuradio", "zmq", "serialization", ""]
+
+license = "GPLv3"
+
 
 [dependencies]
+bytes = "0.4"
+
+[dev-dependencies]
+zmq = "0.8"
+
+[profile.release]
+lto = true
+opt-level = 3
+

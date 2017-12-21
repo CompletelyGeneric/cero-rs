@@ -1,3 +1,5 @@
 {
-    "rust-client.channel": "beta",
+    "rust-client.channel": "nightly-2017-12-01",
+    "rust.cfg_test": true,
+    "rust.show_warnings": true,
 }
