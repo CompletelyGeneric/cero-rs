@@ -5,4 +5,4 @@
 
 
 #### License
-Cero, being a (de)serialization library for GNURadio, draws much of its deserialization logic from [GNURadio itself](https://github.com/gnuradio/gnuradio). As such, cero is licensed under the GNU GPLv3. Please see the license file in the root of the repo for more information.
+Cero, being a (de)serialization library for [GNURadio](https://github.com/gnuradio/gnuradio), is licensed under the GNU GPLv3. Please see the license file in the root of the repo for more information.
