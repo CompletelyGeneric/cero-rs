@@ -1,35 +1,32 @@
 use bytes::{Bytes, Buf, IntoBuf, BigEndian, LittleEndian};
 // use bytes::buf::FromBuf;
 use gr_types::magic::*;
-use gr_types::types::{TagField, UVIType};
-use cero_types::msg::{Msg, Header};
+use gr_types::types::{ TagField, UVIType };
+use cero_types::msg::{ Msg, Header };
 use cero_types::tag::Tag;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt; 
 
 
-
-pub fn deserialize(gr_zmq_msg: &[u8]) -> Msg { 
-    let mut buf = Bytes::from(gr_zmq_msg).into_buf();
+pub fn deserialize<B: IntoBuf>(gr_zmq_msg: B) -> Msg { 
+    let mut buf = gr_zmq_msg.into_buf();
     // Validate magic and version at some point
-    let gr_magic = buf.get_u16::<LittleEndian>();
-    let gr_version = buf.get_u8();
-
+    let _gr_magic = buf.get_u16::<LittleEndian>();
+    let _gr_version = buf.get_u8();
     let offset = buf.get_u64::<LittleEndian>();
     let num_tags = buf.get_u64::<LittleEndian>();
     let header = Header {offset: offset, num_tags: num_tags};
-    let tags: Vec<Tag> = Vec::new();
+    let tags: Vec<Tag> = Vec::with_capacity(num_tags as usize);
     let mut msg = Msg {header: header, tags: tags};
-    //let mut buf_ref = buf.by_ref();
     
     for _ in 0..num_tags {
-        msg.tags.push(parse_tag(&mut buf))
+        msg.tags.push(parse_tag(&mut buf));
     }
     return msg;
 }
 
-
-pub fn parse_tag<T: Buf>(buf: &mut T) -> Tag {
+pub fn parse_tag<T: Buf>(buf: &mut T) -> Tag
+{
     let tag_offset = buf.get_u64::<LittleEndian>();
     let key = parse_tag_field(buf);
     let value = parse_tag_field(buf);
@@ -37,7 +34,6 @@ pub fn parse_tag<T: Buf>(buf: &mut T) -> Tag {
     let tag = Tag {offset: tag_offset, key, value};
     return tag;
 }
-
 
 pub fn parse_tag_field<T: Buf>(buf: &mut T) -> TagField {
     let tag_type = buf.get_u8();
@@ -60,25 +56,25 @@ pub fn parse_tag_field<T: Buf>(buf: &mut T) -> TagField {
         PST_DOUBLE =>  TagField::Double(buf.get_f64::<BigEndian>()),
         PST_COMPLEX => TagField::Complex(buf.get_f64::<BigEndian>(), buf.get_f64::<BigEndian>()), // (real, imaginary)
         PST_TUPLE => { // We're chooseing to represent tuples as vectors for the time being
-            let num_items = buf.get_u32::<BigEndian>();
-            let mut vec = Vec::<TagField>::new();
+            let num_items = buf.get_u32::<BigEndian>() as usize;
+            let mut vec = Vec::<TagField>::with_capacity(num_items);
             for _ in 0..num_items {
                 vec.push(parse_tag_field(buf));
             }
             TagField::Tuple(vec)
         },
         PST_VECTOR => { // A PST_Vector can hold any type defined in our TagField enum
-            let num_items = buf.get_i32::<BigEndian>(); 
-            let mut vec = Vec::<TagField>::new();
+            let num_items = buf.get_i32::<BigEndian>() as usize; 
+            let mut vec = Vec::<TagField>::with_capacity(num_items);
             for _ in 0..num_items{
                 vec.push(parse_tag_field(buf));
             }
             TagField::Vector(vec)
         },
         PST_UNIFORM_VECTOR => {
-            let mut vec = Vec::<UVIType>::new();
             let uvi_type = buf.get_u8();
-            let num_items = buf.get_i32::<BigEndian>();
+            let num_items = buf.get_i32::<BigEndian>() as usize;
+            let mut vec = Vec::<UVIType>::with_capacity(num_items);
             let pad = buf.get_u8(); 
             buf.advance(pad as usize); // throw away the padding
             match uvi_type { // Big ugly copy-paste type parsing logic, surely there's a better way
@@ -143,13 +139,13 @@ pub fn parse_tag_field<T: Buf>(buf: &mut T) -> TagField {
                         vec.push(UVIType::C64(buf.get_f64::<BigEndian>(), buf.get_f64::<BigEndian>()));
                     }
                 },
-                _ => return TagField::Unknown(String::from(format!("ERROR: unknown tag type identifier \'{}\' ", tag_type))),
+                _ => return TagField::Unknown(format!("ERROR: unknown tag type identifier \'{}\' ", tag_type)),
             };
             TagField::UniformVector(vec)
         }, 
         PST_COMMENT | PST_COMMENT_END => TagField::Unimplemented(String::from("ERROR: PST_COMMENT types not implemented")),
         PST_DICT => TagField::Unimplemented(String::from("ERROR: PST_DICT type not implemented")),
-        _ => TagField::Unknown(String::from(format!("ERROR: unknown tag type identifier \'{}\' ", tag_type))),
+        _ => TagField::Unknown(format!("ERROR: unknown tag type identifier \'{}\' ", tag_type)),
     };
     return field;
 }
