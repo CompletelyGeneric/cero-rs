@@ -8,13 +8,19 @@ pub struct Tag {
 }
 
 impl Tag {
-    pub fn new() -> Tag {
-        return Self {offset: 0, key: TagField::Null(), value: TagField::Null()};
-    }
+    pub fn new() -> Self {
+        Self { offset: 0, key: TagField::Null(), value: TagField::Null() }
+    } 
 }
 
 impl fmt::Debug for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "TAG: Offset: {:?}, Key: {:?}, Value: {:?}", self.offset, self.key, self.value)
+    }
+}
+
+impl Default for Tag {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -1,17 +1,14 @@
 [package]
 name = "cero"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Hugh McElderry <hugh@hugh.moe>"]
 description = "A (de)serialization library for gnuradio's ZeroMQ blocks"
 documentation = "TODO:"
 homepage = ""
 repository = ""
-
 readme = "README.md"
-keywords = ["gnuradio", "zmq", "serialization", ""]
-
+keywords = ["gnuradio", "zmq", "serialization"]
 license = "GPLv3"
-
 
 [dependencies]
 bytes = "0.4"
@@ -19,7 +16,38 @@ bytes = "0.4"
 [dev-dependencies]
 zmq = "0.8"
 
+[profile.dev]
+opt-level = 0
+debug = true 
+rpath = false 
+lto = false 
+debug-assertions = true
+codegen-units = 1 
+panic = 'unwind'
+
 [profile.release]
 lto = true
 opt-level = 3
+debug = false
+rpath = false
+
+[profile.test]
+opt-level = 0
+debug = 2
+rpath = false
+lto = false
+debug-assertions = true
+codegen-units = 1
+panic = 'unwind'
+
+[profile.bench]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = 'unwind'
+
+
 
