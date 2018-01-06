@@ -1,6 +1,7 @@
 use cero_types::tag::Tag;
 use std::fmt;
- 
+
+#[cfg_attr(feature = "serde", derive(Serialize))]
 #[derive(Default)]
 pub struct Header {
     pub offset: u64,
@@ -19,6 +20,10 @@ impl fmt::Debug for Header {
     }
 }
 
+//     # #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+//     # struct S { /* ... */ }
+
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Msg {
     pub header: Header,
     pub tags: Vec<Tag>,
@@ -42,3 +47,4 @@ impl Default for Msg {
         Self::new()
     }
 }
+

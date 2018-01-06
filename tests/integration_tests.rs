@@ -18,7 +18,7 @@ fn deserialize_known_good_gr_zmq_msg() {
 // Used for testing cero with a real gr_zmq connection
 fn deserialize_zmq() {
     let ctx = zmq::Context::new();
-    let mut socket = ctx.socket(zmq::SUB).unwrap();
+    let socket = ctx.socket(zmq::SUB).unwrap();
     socket.connect("tcp://127.0.0.1:5555").unwrap();
     let subs = [];
     socket.set_subscribe(&subs);

@@ -1,11 +1,11 @@
-use bytes::{Bytes, Buf, IntoBuf, BigEndian, LittleEndian};
+use bytes::{Buf, IntoBuf, BigEndian, LittleEndian};
 // use bytes::buf::FromBuf;
 use gr_types::magic::*;
 use gr_types::types::{ TagField, UVIType };
 use cero_types::msg::{ Msg, Header };
 use cero_types::tag::Tag;
-use std::ffi::OsStr;
-use std::os::unix::ffi::OsStrExt; 
+use std::str;
+
 
 
 pub fn deserialize<B: IntoBuf>(gr_zmq_msg: B) -> Msg { 
@@ -31,7 +31,7 @@ pub fn parse_tag<T: Buf>(buf: &mut T) -> Tag
     let key = parse_tag_field(buf);
     let value = parse_tag_field(buf);
     let _ = parse_tag_field(buf); // Currently we throw away the src_id, we should probably just have it as an Option
-    let tag = Tag {offset: tag_offset, key, value};
+    let tag = Tag {offset: tag_offset, key: key, value: value};
     return tag;
 }
 
@@ -42,7 +42,10 @@ pub fn parse_tag_field<T: Buf>(buf: &mut T) -> TagField {
         PST_FALSE => TagField::Bool(false),
         PST_SYMBOL => { 
             let len = buf.get_u16::<BigEndian>() as usize; 
-            let symbol = OsStr::from_bytes(&buf.bytes()[0..len]).to_os_string(); // 0.2.0 will fix this hopefully
+            // We're assuming that GNURadio will never send us invalid utf8
+            // TODO: Write tests to verify 
+            let symbol = unsafe { str::from_utf8_unchecked(&buf.bytes()[0..len]).to_string() }; 
+            // let symbol = String::from_utf8_lossy(&buf.bytes()[0..len]).to_string();
             buf.advance(len);
             TagField::Symbol(symbol)
         },

@@ -1,6 +1,7 @@
 use std::fmt;
 use gr_types::types::TagField;
 
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Tag {
     pub offset: u64,
     pub key: TagField,
